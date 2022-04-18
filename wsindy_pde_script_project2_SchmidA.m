@@ -12,8 +12,8 @@
 clc; 
 
 % choose data set, must be 1 or 2
-% 1 = 01-25, sine wave input signal
-% 2 = 02-09, 5 cycle burst input signal 
+% 1 = 01-25, sine wave input 
+% 2 = 02-09, 5 cycle burst input  
 data_set = 2;
 
 % choose data mode, must be 'velocity' or 'displacement'
@@ -53,17 +53,6 @@ xs_obs{2} = num2cell(t_vec, 1);
 xs_obs{2} = cell2mat(xs_obs{2});
 dim = length(dims);
 n = length(U_obs);
-
-%% Subsample data (if desired)
-%%% set row d of coarsen_data to [i inc f] to subsample dth coordinate to start at index i,
-%%% end at index f, and skip every inc gridpoint. e.g:
-%%% coarsen_data(1:dim-1,2) = 2; coarsens spatiotemporal grid by factor of 2 in each spatial coordinate
-
-%coarsen_data = [ones(dim,2) dims'];
-% coarsen_data(1:dim-1,2) = 2;
-
-%[xs_obs,U_obs] = subsamp(xs_obs,U_obs,coarsen_data,dims);
-%dims = cellfun(@(x) length(x), xs_obs);
 
 %% Add noise
 
