@@ -14,12 +14,12 @@ clc;
 % choose data set, must be 1 or 2
 % 1 = 01-25, sine wave input 
 % 2 = 02-09, 5 cycle burst input  
-data_set = 2;
+data_set = 1;
 
 % choose data mode, must be 'velocity' or 'displacement'
 % velocity = experimentally measured velocity values
 % displacement = numerically integrated experimental data
-data_mode = 'velocity'; 
+data_mode = 'displacement'; 
 
 %% Load data
 
@@ -28,13 +28,18 @@ if data_set == 1
 elseif data_set == 2
     velocity_data = importdata('data\velocity-clean-Al1-02-09.mat');
 else
-    error('Data set must be 1 or 2')
+    error('data_set must be 1 or 2')
 end 
 
 [x_pts, t_pts] = size(velocity_data);
 
-x_vec = 0:x_pts-1;
-t_vec = 1:t_pts;
+% integer steps
+%x_vec = 0:x_pts-1;
+%t_vec = 0:t_pts-1;
+
+% physically relevant steps
+x_vec = linspace(0, .1, x_pts); %beam length=.1m
+t_vec = (1e-6)*(0:t_pts-1); %frequency=1e6, 1e-6 s
 
 displacement_data = integrate_data(velocity_data, t_vec);
 
@@ -44,7 +49,7 @@ if strcmp(data_mode, 'velocity')
 elseif strcmp(data_mode, 'displacement')
     U_obs = num2cell(displacement_data,[1 2]);
 else
-    error('Data mode must be velocity or displacement')
+    error('data_mode must be "velocity" or "displacement"')
 end
 
 dims = size(U_obs{1});
@@ -55,7 +60,7 @@ dim = length(dims);
 n = length(U_obs);
 
 %% Add noise
-
+% keep at 0, working with experimental data 
 sigma_NR = 0.0;
 noise_dist = 0; 
 noise_alg = 0;
@@ -87,8 +92,15 @@ s_t = max(floor(length(xs_obs{end})/50),1);
 
 %%% set reference test function parameters using spectrum of data:
 %%% if tauhat<=0, explicit vals for m_x,m_t,p_x,p_t used. 
+% tauhats chosen to have the red line (FT of the test function) 
+% go through the center of the yellow dot (corner of the data FT spectrum) 
+% for the given data set and phi_class 
 if data_set == 1
-    tauhat = 2;
+    if phi_class == 1
+        tauhat = 2;
+    else %phi_class==2
+        tauhat = 2.25;
+    end
 else %data_set == 2
     tauhat = 1.25;
 end
@@ -105,8 +117,17 @@ p_t = 7;
 toggle_scale = 2;
 
 %---------------- model library
+if strcmp(data_mode, 'velocity')
+    max_dt = 1; %up to acceleration 
+    % lhs = time derivative of velocity 
+    lhs = [1 0 1];
+else %strcmp(data_mode, 'displacement')
+    max_dt = 2; %up to acceleration 
+    % lhs = second time derivative of displacement 
+    lhs = [1 0 2];
+end
+
 max_dx = 4;
-max_dt = 3;
 polys = 0:4;
 trigs = [];
 use_all_dt = 1;
@@ -116,13 +137,13 @@ custom_remove = {}; %{@(mat,lhs) find(all([mat(:,3)==0 ~ismember(mat,lhs,'rows')
 
 % set lhs
 % 1 x (n+dim) row vector, [p1 ... pn ... d1 ... ddim], n=num state variables, dim = dimensions
-if strcmp(data_mode, 'velocity')
-    % lhs = time derivative of velocity 
-    lhs = [1 0 1];
-else %strcmp(data_mode, 'displacement')
-    % lhs = second time derivative of displacement 
-    lhs = [1 0 2];
-end
+% if strcmp(data_mode, 'velocity')
+%     % lhs = time derivative of velocity 
+%     lhs = [1 0 1];
+% else %strcmp(data_mode, 'displacement')
+%     % lhs = second time derivative of displacement 
+%     lhs = [1 0 2];
+% end
  
 true_nz_weights = {};
 

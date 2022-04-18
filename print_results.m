@@ -28,7 +28,7 @@ for k=1:n
 end
 if ~isempty(axi)
     Tpr = tpscore(W,axi);
-    fprintf(filename,'TP Score = %1.2f\n', Tpr);
+    fprintf(filename,'\nTP Score = %1.2f\n', Tpr);
 else
     Tpr=0;
 end
@@ -63,7 +63,6 @@ fprintf(filename,'\n[lambda_hat gamma] = ');
 fprintf(filename,'%.3e ',[lambda_learned gamma]);
 fprintf(filename,'\n[sigma_NR sigma] = ');
 fprintf(filename,'%.3e ',[noise_ratio sigma]);
-
 
 fprintf(filename,'\n      \n');
 fprintf(filename,'Elapsed time WSINDy = %4.4f \n',ET_wsindy);
