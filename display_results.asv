@@ -17,21 +17,26 @@ if toggle_plot_sol>0
 for jj=1:min(length(toggle_plot_sol),length(U_obs))
     figind = figind +1;
     figure(figind); 
+    %colormap(turbo(50))
     surf(xs_obs{1},xs_obs{2},U_obs{min(toggle_plot_sol(jj),length(U_obs))}', 'EdgeColor','none')    
+    zlabel('$u$','interpreter','latex','fontsize',14)
     set(gca, 'TickLabelInterpreter','latex','fontsize',14)
     xlabel('$x$','interpreter','latex','fontsize',14)
     ylabel('$t$','interpreter','latex','fontsize',14)
     xlim([xs_obs{1}(1) xs_obs{1}(end)])
     ylim([xs_obs{2}(1) xs_obs{2}(end)])
     colorbar
+    title(['U(',num2str(min(toggle_plot_sol(jj),length(U_obs))),')'],'interpreter','latex')
     
     if strcmp(data_mode, 'velocity')
-        zlabel('$w_{,t}$','interpreter','latex','fontsize',14')
-        title('Velocity Data','interpreter','latex')
+        zlabel('$w_{,t}$', 'interpreter','latex','fontsize',14')
+        % lhs = time derivative of velocity 
+        lhs = [1 0 1];
     else %strcmp(data_mode, 'displacement')
-        zlabel('$w$','interpreter','latex','fontsize',14')
-        title('Displacement Data','interpreter','latex')
+        % lhs = second time derivative of displacement 
+        lhs = [1 0 2];
     end
+
 
 end
 end 
