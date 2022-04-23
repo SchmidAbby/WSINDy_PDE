@@ -14,7 +14,8 @@ clc;
 % choose data set, must be 1 or 2
 % 1 = 01-25, sine wave input 
 % 2 = 02-09, 5 cycle burst input  
-data_set = 1;
+% 3 = , FEM results
+data_set = 2;
 
 % choose data mode, must be 'velocity' or 'displacement'
 % velocity = experimentally measured velocity values
@@ -27,10 +28,13 @@ if data_set == 1
     velocity_data = importdata('data\velocity-clean-Al1-01-25.mat');
 elseif data_set == 2
     velocity_data = importdata('data\velocity-clean-Al1-02-09.mat');
+elseif data_set == 3
+    displacement_data = importdata('data\disp_output_test.mat');
 else
     error('data_set must be 1 or 2')
 end 
 
+%[x_pts, t_pts] = size(displacement_data);
 [x_pts, t_pts] = size(velocity_data);
 
 % integer steps
@@ -93,7 +97,8 @@ s_t = max(floor(length(xs_obs{end})/50),1);
 %%% set reference test function parameters using spectrum of data:
 %%% if tauhat<=0, explicit vals for m_x,m_t,p_x,p_t used. 
 % tauhats chosen to have the red line (FT of the test function) 
-% go through the center of the yellow dot (corner of the data FT spectrum) 
+% go through the center of the yellow dot in the top plot, 
+% ie the corner of the data FT spectrum wrt space 
 % for the given data set and phi_class 
 if data_set == 1
     if phi_class == 1
@@ -102,7 +107,11 @@ if data_set == 1
         tauhat = 2.25;
     end
 else %data_set == 2
-    tauhat = 1.25;
+    if phi_class == 1
+        tauhat = 1.3;
+    else %phi_class==2
+        tauhat = 1.5;
+    end
 end
 
 tau = 10^-10;
@@ -117,6 +126,10 @@ p_t = 7;
 toggle_scale = 2;
 
 %---------------- model library
+
+% set max_dt and lhs based on input data 
+% lhs
+% 1 x (n+dim) row vector, [p1 ... pn ... d1 ... ddim], n=num state variables, dim = dimensions
 if strcmp(data_mode, 'velocity')
     max_dt = 1; %up to acceleration 
     % lhs = time derivative of velocity 
@@ -131,20 +144,9 @@ max_dx = 4;
 polys = 0:4;
 trigs = [];
 use_all_dt = 1;
-use_cross_dx = 0;
+use_cross_dx = 1;
 custom_add = [];
-custom_remove = {}; %{@(mat,lhs) find(all([mat(:,3)==0 ~ismember(mat,lhs,'rows')],2))};
-
-% set lhs
-% 1 x (n+dim) row vector, [p1 ... pn ... d1 ... ddim], n=num state variables, dim = dimensions
-% if strcmp(data_mode, 'velocity')
-%     % lhs = time derivative of velocity 
-%     lhs = [1 0 1];
-% else %strcmp(data_mode, 'displacement')
-%     % lhs = second time derivative of displacement 
-%     lhs = [1 0 2];
-% end
- 
+custom_remove = {}; 
 true_nz_weights = {};
 
 %% Build Linear System
