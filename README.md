@@ -1,6 +1,7 @@
-# WSINDy_PDE: algorithm for identification of PDE systems using the weak form of the dynamics
- 
-use wsindy_pde_script.m to recreate results in paper below.
+# APPM 5720-38
+# Project 2
+
+Based on the code available for the paper 
 
 Copyright 2020, All Rights Reserved
 Code by Daniel A. Messenger
