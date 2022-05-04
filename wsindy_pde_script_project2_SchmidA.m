@@ -9,13 +9,13 @@
 
 %% Choose dataset and data mode
 
+clear all;
 clc; 
 
 % choose data set, must be 1 or 2
-% 1 = 01-25, sine wave input 
-% 2 = 02-09, 5 cycle burst input  
-% 3 = , FEM results
-data_set = 2;
+% 1 = 01-25, sine wave input
+% 2 = 02-09, 5 cycle burst input 
+data_set = 1;
 
 % choose data mode, must be 'velocity' or 'displacement'
 % velocity = experimentally measured velocity values
@@ -28,23 +28,17 @@ if data_set == 1
     velocity_data = importdata('data\velocity-clean-Al1-01-25.mat');
 elseif data_set == 2
     velocity_data = importdata('data\velocity-clean-Al1-02-09.mat');
-elseif data_set == 3
-    displacement_data = importdata('data\disp_output_test.mat');
 else
     error('data_set must be 1 or 2')
 end 
 
-%[x_pts, t_pts] = size(displacement_data);
 [x_pts, t_pts] = size(velocity_data);
 
-% integer steps
-%x_vec = 0:x_pts-1;
-%t_vec = 0:t_pts-1;
-
-% physically relevant steps
+% define x and t vectors 
 x_vec = linspace(0, .1, x_pts); %beam length=.1m
 t_vec = (1e-6)*(0:t_pts-1); %frequency=1e6, 1e-6 s
 
+% numerically integrate velocity data to get displacement data 
 displacement_data = integrate_data(velocity_data, t_vec);
 
 % convert to cell data structure
@@ -74,7 +68,7 @@ rng_seed = rng().Seed;
 rng(rng_seed);
 [U_obs,noise,snr,sigma] = gen_noise(U_obs,sigma_NR,noise_dist,noise_alg,rng_seed,0);
 
-%% set plots
+%% Set plots
 
 toggle_plot_basis_fcn = 1;
 toggle_plot_sol =  1;
@@ -86,11 +80,9 @@ toggle_plot_fft = 1;
 
 %---------------- weak discretization
 %%% phi_class = 1 for piecewise polynomial test function, 2 for Gaussian
-phi_class = 1;          
+phi_class = 2;          
 
 %%% set convolution query point spacing:
-%s_x = 5;  
-%s_t = 5; 
 s_x = max(floor(length(xs_obs{1})/50),1);
 s_t = max(floor(length(xs_obs{end})/50),1);
 
@@ -144,7 +136,7 @@ max_dx = 4;
 polys = 0:4;
 trigs = [];
 use_all_dt = 1;
-use_cross_dx = 1;
+use_cross_dx = 0;
 custom_add = [];
 custom_remove = {}; 
 true_nz_weights = {};
